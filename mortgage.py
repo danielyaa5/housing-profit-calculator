@@ -1,30 +1,29 @@
 from __future__ import print_function
 
 import argparse
-import decimal
+from decimal import ROUND_CEILING, ROUND_HALF_UP, Decimal
 
-from helpers import dollar
+from dollardecimal import DollarDecimal
+import constants as c
 
-MONTHS_IN_YEAR = 12
 
-
-class Mortgage:
+class MortgageWithoutDeductible:
     def __init__(self, interest, months, amount):
         self._interest = float(interest)
         self._months = int(months)
-        self._amount = dollar(amount)
+        self._amount = DollarDecimal(amount)
 
     def rate(self):
         return self._interest
 
     def month_growth(self):
-        return 1. + self._interest / MONTHS_IN_YEAR
+        return 1. + self._interest / c.MONTHS_PER_YEAR
 
     def apy(self):
-        return self.month_growth() ** MONTHS_IN_YEAR - 1
+        return self.month_growth() ** c.MONTHS_PER_YEAR - 1
 
     def loan_years(self):
-        return float(self._months) / MONTHS_IN_YEAR
+        return float(self._months) / c.MONTHS_PER_YEAR
 
     def loan_months(self):
         return self._months
@@ -34,15 +33,15 @@ class Mortgage:
 
     def monthly_payment(self):
         pre_amt = float(self.amount()) * self.rate() / (
-                float(MONTHS_IN_YEAR) * (1. - (1. / self.month_growth()) ** self.loan_months()))
-        return dollar(pre_amt, round=decimal.ROUND_CEILING)
+                float(c.MONTHS_PER_YEAR) * (1. - (1. / self.month_growth()) ** self.loan_months()))
+        return DollarDecimal(pre_amt).quantize(c.DOLLAR_QUANTIZE, rounding=ROUND_CEILING)
 
     def total_value(self, m_payment):
         return m_payment / self.rate() * (
-                float(MONTHS_IN_YEAR) * (1. - (1. / self.month_growth()) ** self.loan_months()))
+                float(c.MONTHS_PER_YEAR) * (1. - (1. / self.month_growth()) ** self.loan_months()))
 
     def annual_payment(self):
-        return self.monthly_payment() * MONTHS_IN_YEAR
+        return self.monthly_payment() * c.MONTHS_PER_YEAR
 
     def total_payout(self):
         return self.monthly_payment() * self.loan_months()
@@ -50,10 +49,10 @@ class Mortgage:
     def monthly_payment_schedule(self):
         monthly = self.monthly_payment()
         balance = self.amount()
-        rate = decimal.Decimal(str(self.rate())).quantize(decimal.Decimal('.000001'))
+        rate = Decimal(str(self.rate())).quantize(Decimal('.000001'))
         while True:
-            interest_unrounded = balance * rate * decimal.Decimal(1) / MONTHS_IN_YEAR
-            interest = dollar(interest_unrounded, round=decimal.ROUND_HALF_UP)
+            interest_unrounded = balance * rate * Decimal(1) / c.MONTHS_PER_YEAR
+            interest = DollarDecimal(interest_unrounded).quantize(c.DOLLAR_QUANTIZE, rounding=ROUND_HALF_UP)
             if monthly >= balance + interest:
                 yield balance, interest
                 break
@@ -62,8 +61,8 @@ class Mortgage:
             balance -= principle
 
     def yearly_payment_schedule(self):
-        yearly_principal = decimal.Decimal(0)
-        yearly_interest = decimal.Decimal(0)
+        yearly_principal = Decimal(0)
+        yearly_interest = Decimal(0)
         for index, payment in enumerate(self.monthly_payment_schedule()):
             month_num = index + 1
             monthly_principal, monthly_interest = payment
@@ -71,8 +70,40 @@ class Mortgage:
             yearly_interest += monthly_interest
             if month_num % 12 == 0:
                 yield yearly_principal, yearly_interest
-                yearly_principal = decimal.Decimal(0)
-                yearly_interest = decimal.Decimal(0)
+                yearly_principal = Decimal(0)
+                yearly_interest = Decimal(0)
+
+
+class Mortgage(MortgageWithoutDeductible):
+    def __init__(self, interest_rate, loan_term_months, loan_amount):
+        self.max_deductible_mortgage = MortgageWithoutDeductible(
+            interest=interest_rate, amount=750000, months=loan_term_months
+        )
+        super().__init__(interest_rate, loan_term_months, loan_amount)
+
+    def monthly_mortgage_schedule(self):
+        max_deductible_mortgage_itr = self.max_deductible_mortgage.monthly_payment_schedule()
+
+        for index, payment in enumerate(super().monthly_payment_schedule()):
+            month_num = index + 1
+            principal, interest = payment
+            max_deductible_interest = next(max_deductible_mortgage_itr)[1]
+            deductible_interest = min(max_deductible_interest, interest)
+            yield month_num, principal, interest, deductible_interest
+
+    def yearly_mortgage_schedule(self):
+        yearly_principal = DollarDecimal(0)
+        yearly_interest = DollarDecimal(0)
+        yearly_deductible_interest = DollarDecimal(0)
+        for month_num, principal, interest, deductible_interest in self.monthly_mortgage_schedule():
+            yearly_principal += principal
+            yearly_interest += interest
+            yearly_deductible_interest += deductible_interest
+            if month_num % 12 == 0:
+                yield (month_num / 12), yearly_principal, yearly_interest, yearly_deductible_interest
+                yearly_principal = DollarDecimal(0)
+                yearly_interest = DollarDecimal(0)
+                yearly_deductible_interest = DollarDecimal(0)
 
 
 def print_summary(m):
@@ -96,9 +127,9 @@ def main():
     args = parser.parse_args()
 
     if args.months:
-        m = Mortgage(float(args.interest) / 100, float(args.months), args.amount)
+        m = MortgageWithoutDeductible(float(args.interest) / 100, float(args.months), args.amount)
     else:
-        m = Mortgage(float(args.interest) / 100, float(args.years) * MONTHS_IN_YEAR, args.amount)
+        m = MortgageWithoutDeductible(float(args.interest) / 100, float(args.years) * c.MONTHS_PER_YEAR, args.amount)
 
     print_summary(m)
 
