@@ -6,8 +6,8 @@ from typing import TYPE_CHECKING
 
 import pandas as pd
 from tabulate import tabulate
-import constants as c
 
+import constants as c
 from dollardecimal import DollarDecimal
 
 if TYPE_CHECKING:
@@ -25,6 +25,10 @@ class MonthlyBreakdown:
         ib = self.investment_breakdown
         principal_collected = DollarDecimal(ib.down_payment)
         total_cost_with_savings_minus_principal = DollarDecimal(0)
+        tenant_rent = ib.tenant_rent or DollarDecimal(0)
+        appreciated_price = ib.purchase_price
+        hoa = ib.hoa or 0
+
         for month_num, principal, interest, deductible_interest in ib.mortgage.monthly_mortgage_schedule():
             year_num = (month_num - 1) // c.MONTHS_PER_YEAR + 1
             if self.years and year_num > self.years:
@@ -34,25 +38,22 @@ class MonthlyBreakdown:
                 return
 
             federal_tax_savings = ib.federal_tax_savings(year_num) / c.MONTHS_PER_YEAR
-            state_tax_savings = ib.state_tax_savings(year_num) / 12
+            state_tax_savings = ib.state_tax_savings(year_num) / c.MONTHS_PER_YEAR
             monthly_tax_savings = federal_tax_savings + state_tax_savings
-            monthly_savings = monthly_tax_savings + ib.monthly_rent
-            if ib.tenant_rent:
-                monthly_savings += ib.tenant_rent
-            monthly_cost = principal + interest + ib.monthly_property_tax + ib.monthly_home_insurance
-            if ib.hoa:
-                monthly_cost += ib.hoa
+            monthly_savings = monthly_tax_savings + ib.rent(year_num) + tenant_rent
+            monthly_cost = principal + interest + ib.monthly_property_tax + ib.monthly_home_insurance + hoa
             monthly_cost_with_savings = monthly_cost - monthly_savings
             monthly_cost_with_savings_minus_principal = monthly_cost_with_savings - principal
             principal_collected += principal
-            monthly_appreciation = ib.yearly_appreciation(year_num) / c.MONTHS_PER_YEAR
+            monthly_appreciation = ib.monthly_appreciation(year_num)
             mortgage = principal + interest
-            appreciated_price = ib.appreciated_price(year_num)
+            appreciated_price += monthly_appreciation
             sale_closing_cost = DollarDecimal(appreciated_price * ib.sale_closing_cost_percent / 100)
             total_cost_with_savings_minus_principal += monthly_cost_with_savings_minus_principal
             total_cost = total_cost_with_savings_minus_principal + sale_closing_cost + ib.purchase_closing_cost
-            sale_profit = appreciated_price - ib.purchase_price - total_cost + principal_collected
+            sale_profit = appreciated_price - ib.purchase_price - total_cost + principal_collected - ib.down_payment
             sale_profit_per_month = sale_profit / month_num
+
             breakdown = {
                 'month': month_num,
                 'year': year_num,
@@ -65,6 +66,7 @@ class MonthlyBreakdown:
                 'federal_tax_savings': federal_tax_savings,
                 'state_tax_savings': state_tax_savings,
                 'tax_savings': monthly_tax_savings,
+                'rent': ib.rent(year_num),
                 'savings': monthly_savings,
                 'appreciation': monthly_appreciation,
                 'appreciated_price': appreciated_price,

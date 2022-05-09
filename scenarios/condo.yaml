@@ -1,12 +1,14 @@
 # Upfront Costs
-purchase_price: 1200000
+purchase_price: 800000
 down_payment_percent: 20
 #down_payment_amount: 450000
 purchase_closing_cost_percent: 2
 sale_closing_cost_percent: 8
+rent_control_percent: 3
 
 # Monthly Recurring Costs
 homeowners_insurance_rate_percent: 0.22
+hoa: 500
 
 # Loan
 loan_term_years: 30
@@ -23,4 +25,4 @@ monthly_rent: 3000
 #tenant_rent: 3000
 
 # Speculative
-annual_appreciation_percent: 6
+annual_appreciation_percent: 2

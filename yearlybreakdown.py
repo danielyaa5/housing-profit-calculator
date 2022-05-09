@@ -45,6 +45,7 @@ class YearlyBreakdown:
                 'federal_tax_savings': _sum('federal_tax_savings'),
                 'state_tax_savings': _sum('state_tax_savings'),
                 'tax_savings': _sum('tax_savings'),
+                'rent': month_bd['rent'],
                 'savings': _sum('savings'),
                 'appreciation': _sum('appreciation'),
                 'appreciated_price': month_bd['appreciated_price'],

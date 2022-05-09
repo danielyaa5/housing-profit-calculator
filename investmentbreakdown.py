@@ -35,6 +35,7 @@ class InvestmentBreakdown:
             annual_appreciation_percent,
             scenario_name,
             hoa,
+            rent_control_percent,
     ):
         self.interest_rate_percent = Decimal(interest_rate_percent)
         self.interest_rate = self.interest_rate_percent / 100
@@ -54,7 +55,7 @@ class InvestmentBreakdown:
         self.homeowners_insurance_rate_percent = homeowners_insurance_rate_percent
         self.homeowners_insurance_rate = Decimal(self.homeowners_insurance_rate_percent) / 100
         self.yearly_income = DollarDecimal(yearly_income)
-        self.monthly_rent = DollarDecimal(monthly_rent)
+        self.initial_monthly_rent = DollarDecimal(monthly_rent)
         self.tenant_rent = DollarDecimal(tenant_rent) if tenant_rent else None
         self.hoa = DollarDecimal(hoa) if hoa is not None else None
         self.purchase_closing_cost_percent = Decimal(purchase_closing_cost_percent)
@@ -80,6 +81,8 @@ class InvestmentBreakdown:
         )
         self._yearly_appreciated_price = self.calculate_yearly_appreciated_price()
         self.scenario_name = scenario_name
+        self.rent_control_percent = rent_control_percent
+        self.rent_control_rate = Decimal(rent_control_percent or 0) / 100
 
     def describe(self):
         table = []
@@ -94,7 +97,7 @@ class InvestmentBreakdown:
         table.append(['Purchase closing cost', f'{self.purchase_closing_cost} ({self.purchase_closing_cost_percent}%)'])
         if self.hoa is not None:
             table.append(['HOA', f'{self.hoa}'])
-        table.append(['Monthly rent', f'{self.monthly_rent}'])
+        table.append(['Monthly rent', f'{self.initial_monthly_rent}'])
         if self.tenant_rent is not None:
             table.append(['Tenant rent', f'{self.tenant_rent}'])
         table.append(['Annual appreciation', f'{self.annual_appreciation_percent}%'])
@@ -147,19 +150,20 @@ class InvestmentBreakdown:
         return DollarDecimal(total_cost)
 
     def calculate_yearly_appreciated_price(self):
-        return [
+        return [self.purchase_price] + [
             DollarDecimal(
-                compound_interest(self.purchase_price, self.interest_rate, year, 1)
+                compound_interest(self.purchase_price, self.annual_appreciation_rate, year, 1)
             ) for year in rangei(1, self.loan_term_years)
         ]
 
     def appreciated_price(self, year):
-        if year == 0:
-            return self.purchase_price
         return self._yearly_appreciated_price[year - 1]
 
     def yearly_appreciation(self, year):
-        return self.appreciated_price(year) - self.appreciated_price(year - 1)
+        return self.appreciated_price(year + 1) - self.appreciated_price(year)
+
+    def monthly_appreciation(self, year):
+        return self.yearly_appreciation(year) / c.MONTHS_PER_YEAR
 
     def monthly(self, years=None, months=None, dollar_decimal_to_str=True):
         return MonthlyBreakdown(
@@ -168,3 +172,6 @@ class InvestmentBreakdown:
 
     def yearly(self, years=None, dollar_decimal_to_str=True):
         return YearlyBreakdown(investment_breakdown=self, years=years, dollar_decimal_to_str=dollar_decimal_to_str)
+
+    def rent(self, year):
+        return compound_interest(self.initial_monthly_rent, self.rent_control_rate, year - 1, 1)
