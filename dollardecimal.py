@@ -5,7 +5,7 @@ import constants as c
 
 class DollarDecimal(Decimal):
     def __format__(self, *args, **kwargs):
-        f = super().quantize(c.DOLLAR_QUANTIZE).__float__()
+        f = super().quantize(c.TENTH_PLACE_QUANTIZE).__float__()
         is_neg = f < 0
         result = '$' + format(abs(f), ',')
         if is_neg:

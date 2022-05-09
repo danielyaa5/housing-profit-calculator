@@ -7,6 +7,7 @@ import constants as c
 from breakdowniterator import BreakdownIterator
 from dollardecimal import DollarDecimal
 from helpers import compound_interest
+from percentdecimal import PercentDecimal
 
 if TYPE_CHECKING:
     from investmentbreakdown import InvestmentBreakdown
@@ -26,7 +27,7 @@ class MonthlyBreakdown(BreakdownIterator):
         appreciated_price = ib.purchase_price
         hoa = ib.hoa or 0
         initial_index_fund_balance = DollarDecimal(ib.down_payment - ib.purchase_closing_cost)
-        index_fund_balance = initial_index_fund_balance
+        index_fund_value = initial_index_fund_balance
         initial_home_investment = ib.down_payment + ib.purchase_closing_cost
 
         for month_num, principal, interest, deductible_interest in ib.mortgage.monthly_mortgage_schedule():
@@ -49,8 +50,8 @@ class MonthlyBreakdown(BreakdownIterator):
             mortgage = principal + interest
             appreciated_price += monthly_appreciation
             sale_closing_cost = DollarDecimal(appreciated_price * ib.sale_closing_cost_percent / 100)
-            index_fund_balance = compound_interest(
-                principal=index_fund_balance + monthly_cost_with_savings,
+            index_fund_value = compound_interest(
+                principal=index_fund_value + monthly_cost_with_savings,
                 interest_rate=ib.index_fund_annual_return_rate,
                 years=Decimal(1 / c.MONTHS_PER_YEAR),
                 number=Decimal(c.MONTHS_PER_YEAR)
@@ -64,7 +65,7 @@ class MonthlyBreakdown(BreakdownIterator):
             #     'sale_costs': sale_costs,
             #     'principal_collected': principal_collected
             # }, default=str, indent=2))
-            home_investment_balance = appreciated_price - ib.purchase_price - sale_costs + principal_collected
+            home_investment_value = appreciated_price - ib.purchase_price - sale_costs + principal_collected
 
             breakdown = {
                 'month': month_num,
@@ -87,15 +88,18 @@ class MonthlyBreakdown(BreakdownIterator):
                 'cost': monthly_cost,
                 'cost_with_savings': monthly_cost_with_savings,
                 'cost_with_savings_minus_principal': monthly_cost_with_savings_minus_principal,
-                'index_fund_balance': index_fund_balance,
-                'index_fund_growth': index_fund_balance / initial_index_fund_balance * 100,
-                'home_investment_balance': home_investment_balance,
-                'home_investment_growth': home_investment_balance / initial_home_investment * 100,
+                'index_fund_value': index_fund_value,
+                'home_investment_value': home_investment_value,
+                'index_fund_growth': PercentDecimal(index_fund_value / initial_index_fund_balance * 100 - 100),
+                'home_investment_growth': PercentDecimal(home_investment_value / initial_home_investment * 100 - 100),
             }
 
             if self._dollar_decimal_to_str:
+                def should_fmt(v):
+                    return isinstance(v, DollarDecimal) or isinstance(v, PercentDecimal)
+
                 breakdown = {
-                    k: (f'{v}' if isinstance(v, DollarDecimal) else v) for (k, v) in breakdown.items()
+                    k: (f'{v}' if should_fmt(v) else v) for (k, v) in breakdown.items()
                 }
 
             yield breakdown

@@ -34,7 +34,7 @@ class MortgageWithoutDeductible:
     def monthly_payment(self):
         pre_amt = float(self.amount()) * self.rate() / (
                 float(c.MONTHS_PER_YEAR) * (1. - (1. / self.month_growth()) ** self.loan_months()))
-        return DollarDecimal(pre_amt).quantize(c.DOLLAR_QUANTIZE, rounding=ROUND_CEILING)
+        return DollarDecimal(pre_amt).quantize(c.TENTH_PLACE_QUANTIZE, rounding=ROUND_CEILING)
 
     def total_value(self, m_payment):
         return m_payment / self.rate() * (
@@ -52,7 +52,7 @@ class MortgageWithoutDeductible:
         rate = Decimal(str(self.rate())).quantize(Decimal('.000001'))
         while True:
             interest_unrounded = balance * rate * Decimal(1) / c.MONTHS_PER_YEAR
-            interest = DollarDecimal(interest_unrounded).quantize(c.DOLLAR_QUANTIZE, rounding=ROUND_HALF_UP)
+            interest = DollarDecimal(interest_unrounded).quantize(c.TENTH_PLACE_QUANTIZE, rounding=ROUND_HALF_UP)
             if monthly >= balance + interest:
                 yield balance, interest
                 break

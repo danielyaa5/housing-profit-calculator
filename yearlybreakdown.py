@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 import constants as c
 from breakdowniterator import BreakdownIterator
 from dollardecimal import DollarDecimal
+from percentdecimal import PercentDecimal
 
 if TYPE_CHECKING:
     from investmentbreakdown import InvestmentBreakdown
@@ -49,13 +50,18 @@ class YearlyBreakdown(BreakdownIterator):
                 'cost': _sum('cost'),
                 'cost_with_savings': _sum('cost_with_savings'),
                 'cost_with_savings_minus_principal': _sum('cost_with_savings_minus_principal'),
-                'index_fund_balance': month_bd['index_fund_balance'],
-                'sale_balance': month_bd['sale_balance'],
+                'index_fund_value': month_bd['index_fund_value'],
+                'home_investment_value': month_bd['home_investment_value'],
+                'index_fund_growth': month_bd['index_fund_growth'],
+                'home_investment_growth': month_bd['home_investment_growth'],
             }
             if is_last_month or is_full_year:
                 if self._dollar_decimal_to_str:
+                    def should_fmt(v):
+                        return isinstance(v, DollarDecimal) or isinstance(v, PercentDecimal)
+
                     yearly_breakdown = {
-                        k: (f'{v}' if isinstance(v, DollarDecimal) else v) for (k, v) in yearly_breakdown.items()
+                        k: (f'{v}' if should_fmt(v) else v) for (k, v) in yearly_breakdown.items()
                     }
 
                 yield yearly_breakdown
