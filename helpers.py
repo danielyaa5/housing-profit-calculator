@@ -24,9 +24,3 @@ def compound_interest(principal, interest_rate, years, number):
     # calculate total amount
     amount = principal * pow(1 + (interest_rate / number), number * years)
     return amount
-
-
-def compounded_annual_growth_rate(principal_start, principal_end, years):
-    return (principal_end / principal_start) ** (1 / years) - 1
-
-

@@ -121,8 +121,8 @@ def print_summary(m):
 def main():
     parser = argparse.ArgumentParser(description='Mortgage Amortization Tools')
     parser.add_argument('-i', '--interest', default=6, dest='interest')
-    parser.add_argument('-y', '--loan-years', default=30, dest='years')
-    parser.add_argument('-m', '--loan-months', default=None, dest='months')
+    parser.add_argument('-y', '--loan-_years', default=30, dest='_years')
+    parser.add_argument('-m', '--loan-_months', default=None, dest='_months')
     parser.add_argument('-a', '--amount', default=100000, dest='amount')
     args = parser.parse_args()
 

@@ -1,15 +1,10 @@
 from __future__ import annotations
 
-import json
-import os
-import pathlib
 from decimal import Decimal
 from typing import TYPE_CHECKING
 
-import pandas as pd
-from tabulate import tabulate
-
 import constants as c
+from breakdowniterator import BreakdownIterator
 from dollardecimal import DollarDecimal
 from helpers import compound_interest
 
@@ -17,28 +12,29 @@ if TYPE_CHECKING:
     from investmentbreakdown import InvestmentBreakdown
 
 
-class MonthlyBreakdown:
+class MonthlyBreakdown(BreakdownIterator):
     def __init__(self, investment_breakdown: InvestmentBreakdown, years=None, months=None, dollar_decimal_to_str=True):
-        self.investment_breakdown = investment_breakdown
-        self.years = years
-        self.months = months
-        self.dollar_decimal_to_str = dollar_decimal_to_str
+        super().__init__(investment_breakdown, dollar_decimal_to_str)
+        self._years = years
+        self._months = months
 
     def generator(self):
-        ib = self.investment_breakdown
+        ib = self._investment_breakdown
         principal_collected = DollarDecimal(ib.down_payment)
         total_cost_with_savings = DollarDecimal(0)
         tenant_rent = ib.tenant_rent or DollarDecimal(0)
         appreciated_price = ib.purchase_price
         hoa = ib.hoa or 0
-        index_fund_balance = DollarDecimal(ib.down_payment - ib.purchase_closing_cost)
+        initial_index_fund_balance = DollarDecimal(ib.down_payment - ib.purchase_closing_cost)
+        index_fund_balance = initial_index_fund_balance
+        initial_home_investment = ib.down_payment + ib.purchase_closing_cost
 
         for month_num, principal, interest, deductible_interest in ib.mortgage.monthly_mortgage_schedule():
             year_num = (month_num - 1) // c.MONTHS_PER_YEAR + 1
-            if self.years and year_num > self.years:
+            if self._years and year_num > self._years:
                 return
 
-            if self.months and month_num > self.months:
+            if self._months and month_num > self._months:
                 return
 
             federal_tax_savings = ib.federal_tax_savings(year_num) / c.MONTHS_PER_YEAR
@@ -68,7 +64,7 @@ class MonthlyBreakdown:
             #     'sale_costs': sale_costs,
             #     'principal_collected': principal_collected
             # }, default=str, indent=2))
-            sale_balance = appreciated_price - ib.purchase_price - sale_costs + principal_collected
+            home_investment_balance = appreciated_price - ib.purchase_price - sale_costs + principal_collected
 
             breakdown = {
                 'month': month_num,
@@ -92,27 +88,17 @@ class MonthlyBreakdown:
                 'cost_with_savings': monthly_cost_with_savings,
                 'cost_with_savings_minus_principal': monthly_cost_with_savings_minus_principal,
                 'index_fund_balance': index_fund_balance,
-                'sale_balance': sale_balance,
+                'index_fund_growth': index_fund_balance / initial_index_fund_balance * 100,
+                'home_investment_balance': home_investment_balance,
+                'home_investment_growth': home_investment_balance / initial_home_investment * 100,
             }
 
-            if self.dollar_decimal_to_str:
+            if self._dollar_decimal_to_str:
                 breakdown = {
                     k: (f'{v}' if isinstance(v, DollarDecimal) else v) for (k, v) in breakdown.items()
                 }
 
             yield breakdown
 
-    def list(self):
-        return list(self.generator())
-
-    def df(self):
-        return pd.DataFrame(self.generator())
-
     def csv(self):
-        dirname = pathlib.Path(__file__).parent.resolve()
-        output_path = os.path.join(dirname, 'output', f'{self.investment_breakdown.scenario_name}_monthly.csv')
-        print(f'Outputting monthly breakdown to {output_path}\n')
-        return self.df().to_csv(output_path, index=False)
-
-    def tabulate(self):
-        return tabulate(self.df(), headers='keys', showindex=False)
+        return self._csv('monthly')
