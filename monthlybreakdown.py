@@ -66,6 +66,9 @@ class MonthlyBreakdown(BreakdownIterator):
             #     'principal_collected': principal_collected
             # }, default=str, indent=2))
             home_investment_value = appreciated_price - ib.purchase_price - sale_costs + principal_collected
+            home_investment_growth = PercentDecimal(home_investment_value / initial_home_investment * 100 - 100)
+            index_fund_growth = PercentDecimal(index_fund_value / initial_index_fund_balance * 100 - 100)
+            home_investment_vs_index_fund_growth = home_investment_growth - index_fund_growth
 
             breakdown = {
                 'month': month_num,
@@ -90,8 +93,9 @@ class MonthlyBreakdown(BreakdownIterator):
                 'cost_with_savings_minus_principal': monthly_cost_with_savings_minus_principal,
                 'index_fund_value': index_fund_value,
                 'home_investment_value': home_investment_value,
-                'index_fund_growth': PercentDecimal(index_fund_value / initial_index_fund_balance * 100 - 100),
-                'home_investment_growth': PercentDecimal(home_investment_value / initial_home_investment * 100 - 100),
+                'index_fund_growth': index_fund_growth,
+                'home_investment_growth': home_investment_growth,
+                'home_investment_vs_index_fund_growth': home_investment_vs_index_fund_growth,
             }
 
             if self._dollar_decimal_to_str:

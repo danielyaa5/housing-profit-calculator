@@ -1,0 +1,28 @@
+# Upfront Costs
+purchase_price: 1200000
+down_payment_percent: 20
+purchase_closing_cost_percent: 2
+
+# Closing Cost
+sale_closing_cost_percent: 10
+
+# Monthly Recurring Costs
+homeowners_insurance_rate_percent: 0.22
+
+# Loan
+loan_term_years: 30
+interest_rate_percent: 3.25
+
+# Taxes
+property_tax_rate_percent: 1.25
+state_tax_rate_percent: 11.3
+federal_tax_rate_percent: 35
+yearly_income: 500000
+
+# Income
+monthly_rent: 1650
+tenant_rent: 3750
+
+# Speculative
+annual_appreciation_percent: 5
+index_fund_annual_return_percent: 10

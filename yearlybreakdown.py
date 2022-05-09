@@ -54,6 +54,7 @@ class YearlyBreakdown(BreakdownIterator):
                 'home_investment_value': month_bd['home_investment_value'],
                 'index_fund_growth': month_bd['index_fund_growth'],
                 'home_investment_growth': month_bd['home_investment_growth'],
+                'home_investment_vs_index_fund_growth': month_bd['home_investment_vs_index_fund_growth'],
             }
             if is_last_month or is_full_year:
                 if self._dollar_decimal_to_str:
