@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+import json
 import os
 import pathlib
+from decimal import Decimal
 from typing import TYPE_CHECKING
 
 import pandas as pd
@@ -9,6 +11,7 @@ from tabulate import tabulate
 
 import constants as c
 from dollardecimal import DollarDecimal
+from helpers import compound_interest
 
 if TYPE_CHECKING:
     from investmentbreakdown import InvestmentBreakdown
@@ -24,10 +27,11 @@ class MonthlyBreakdown:
     def generator(self):
         ib = self.investment_breakdown
         principal_collected = DollarDecimal(ib.down_payment)
-        total_cost_with_savings_minus_principal = DollarDecimal(0)
+        total_cost_with_savings = DollarDecimal(0)
         tenant_rent = ib.tenant_rent or DollarDecimal(0)
         appreciated_price = ib.purchase_price
         hoa = ib.hoa or 0
+        index_fund_balance = DollarDecimal(ib.down_payment - ib.purchase_closing_cost)
 
         for month_num, principal, interest, deductible_interest in ib.mortgage.monthly_mortgage_schedule():
             year_num = (month_num - 1) // c.MONTHS_PER_YEAR + 1
@@ -49,10 +53,22 @@ class MonthlyBreakdown:
             mortgage = principal + interest
             appreciated_price += monthly_appreciation
             sale_closing_cost = DollarDecimal(appreciated_price * ib.sale_closing_cost_percent / 100)
-            total_cost_with_savings_minus_principal += monthly_cost_with_savings_minus_principal
-            total_cost = total_cost_with_savings_minus_principal + sale_closing_cost + ib.purchase_closing_cost
-            sale_profit = appreciated_price - ib.purchase_price - total_cost + principal_collected - ib.down_payment
-            sale_profit_per_month = sale_profit / month_num
+            index_fund_balance = compound_interest(
+                principal=index_fund_balance + monthly_cost_with_savings,
+                interest_rate=ib.index_fund_annual_return_rate,
+                years=Decimal(1 / c.MONTHS_PER_YEAR),
+                number=Decimal(c.MONTHS_PER_YEAR)
+            )
+            total_cost_with_savings += monthly_cost_with_savings
+            sale_costs = total_cost_with_savings + sale_closing_cost + ib.purchase_closing_cost
+            # print(json.dumps({
+            #     'appreciated_price': appreciated_price,
+            #     'purchase_price': ib.purchase_price,
+            #     'total_cost_with_savings': total_cost_with_savings,
+            #     'sale_costs': sale_costs,
+            #     'principal_collected': principal_collected
+            # }, default=str, indent=2))
+            sale_balance = appreciated_price - ib.purchase_price - sale_costs + principal_collected
 
             breakdown = {
                 'month': month_num,
@@ -71,12 +87,12 @@ class MonthlyBreakdown:
                 'appreciation': monthly_appreciation,
                 'appreciated_price': appreciated_price,
                 'sale_closing_cost': sale_closing_cost,
-                'sale_profit': sale_profit,
-                'sale_profit_per_month': sale_profit_per_month,
                 'mortgage': mortgage,
                 'cost': monthly_cost,
                 'cost_with_savings': monthly_cost_with_savings,
                 'cost_with_savings_minus_principal': monthly_cost_with_savings_minus_principal,
+                'index_fund_balance': index_fund_balance,
+                'sale_balance': sale_balance,
             }
 
             if self.dollar_decimal_to_str:

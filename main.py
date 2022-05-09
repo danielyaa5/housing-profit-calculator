@@ -33,14 +33,15 @@ def main(house_params_path):
         homeowners_insurance_rate_percent=house_params['homeowners_insurance_rate_percent'],
         purchase_price=house_params['purchase_price'],
         yearly_income=house_params['yearly_income'],
-        monthly_rent=house_params['monthly_rent'],
+        monthly_rent=house_params.get('monthly_rent'),
         tenant_rent=house_params.get('tenant_rent'),
         hoa=house_params.get('hoa'),
         purchase_closing_cost_percent=house_params['purchase_closing_cost_percent'],
         sale_closing_cost_percent=house_params.get('sale_closing_cost_percent'),
         annual_appreciation_percent=house_params.get('annual_appreciation_percent', 0),
-        scenario_name=os.path.basename(house_params_path),
         rent_control_percent=house_params.get('rent_control_percent'),
+        index_fund_annual_return_percent=house_params.get('index_fund_annual_return_percent'),
+        scenario_name=pathlib.Path(house_params_path).stem,
     )
     print('\n')
     print(f'Calculating monthly mortgage payments for:')

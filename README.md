@@ -11,6 +11,6 @@ pip install -r requirements.txt
 
 # Example Usage
 ```
-python main.py -i scenarios/san_luis.yaml
-open output/san_luis.yaml.csv
+python main.py -i scenarios/house.yaml
+open output/house.csv
 ```

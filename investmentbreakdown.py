@@ -36,6 +36,7 @@ class InvestmentBreakdown:
             scenario_name,
             hoa,
             rent_control_percent,
+            index_fund_annual_return_percent
     ):
         self.interest_rate_percent = Decimal(interest_rate_percent)
         self.interest_rate = self.interest_rate_percent / 100
@@ -80,9 +81,11 @@ class InvestmentBreakdown:
             self.state_tax_rate, state_taxes['standard_deduction']
         )
         self._yearly_appreciated_price = self.calculate_yearly_appreciated_price()
-        self.scenario_name = scenario_name
         self.rent_control_percent = rent_control_percent
         self.rent_control_rate = Decimal(rent_control_percent or 0) / 100
+        self.index_fund_annual_return_percent = index_fund_annual_return_percent or 10
+        self.index_fund_annual_return_rate = Decimal(index_fund_annual_return_percent) / 100
+        self.scenario_name = scenario_name
 
     def describe(self):
         table = []
@@ -101,6 +104,7 @@ class InvestmentBreakdown:
         if self.tenant_rent is not None:
             table.append(['Tenant rent', f'{self.tenant_rent}'])
         table.append(['Annual appreciation', f'{self.annual_appreciation_percent}%'])
+        table.append(['Index Fund Annual Return Rate', f'{self.index_fund_annual_return_percent}%'])
 
         print(tabulate(pd.DataFrame(table), showindex=False))
         print('\n')

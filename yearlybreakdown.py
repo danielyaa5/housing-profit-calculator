@@ -50,12 +50,12 @@ class YearlyBreakdown:
                 'appreciation': _sum('appreciation'),
                 'appreciated_price': month_bd['appreciated_price'],
                 'sale_closing_cost': month_bd['sale_closing_cost'],
-                'sale_profit': month_bd['sale_profit'],
-                'sale_profit_per_year': month_bd['sale_profit_per_month'] * c.MONTHS_PER_YEAR,
                 'mortgage': _sum('mortgage'),
                 'cost': _sum('cost'),
                 'cost_with_savings': _sum('cost_with_savings'),
                 'cost_with_savings_minus_principal': _sum('cost_with_savings_minus_principal'),
+                'index_fund_balance': month_bd['index_fund_balance'],
+                'sale_balance': month_bd['sale_balance'],
             }
             if is_last_month or is_full_year:
                 if self.dollar_decimal_to_str:

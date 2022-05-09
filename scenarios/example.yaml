@@ -3,24 +3,29 @@ purchase_price: 1200000
 down_payment_percent: 20
 #down_payment_amount: 450000
 purchase_closing_cost_percent: 2
-sale_closing_cost_percent: 8
+
+# Closing Cost
+sale_closing_cost_percent: 10
 
 # Monthly Recurring Costs
 homeowners_insurance_rate_percent: 0.22
+#hoa: 500
 
 # Loan
 loan_term_years: 30
-interest_rate_percent: 5
+interest_rate_percent: 3.25
 
 # Taxes
 property_tax_rate_percent: 1.25
-state_tax_rate_percent: 11.3
+state_tax_rate_percent: 10.3
 federal_tax_rate_percent: 35
-yearly_income: 500000
+yearly_income: 300000
 
 # Income
-monthly_rent: 3000
-#tenant_rent: 3000
+monthly_rent: 0
+#rent_control_percent: 3
+tenant_rent: 5000
 
 # Speculative
-annual_appreciation_percent: 6
+annual_appreciation_percent: 4
+index_fund_annual_return_percent: 10
