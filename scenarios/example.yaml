@@ -22,7 +22,7 @@ federal_tax_rate_percent: 35
 yearly_income: 300000
 
 # Income
-monthly_rent: 0
+rent: 0
 #rent_control_percent: 3
 tenant_rent: 5000
 

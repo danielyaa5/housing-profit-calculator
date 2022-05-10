@@ -11,18 +11,21 @@ homeowners_insurance_rate_percent: 0.22
 
 # Loan
 loan_term_years: 30
-interest_rate_percent: 3.25
+interest_rate_percent: 4.75
 
 # Taxes
 property_tax_rate_percent: 1.25
-state_tax_rate_percent: 10.3
+state_tax_rate_percent: 11.3
 federal_tax_rate_percent: 35
-yearly_income: 300000
+yearly_income: 500000
 
 # Income
-rent: 0
-tenant_rent: 5000
+rent: 3000
+rent_control_percent: 3
+tenant_rent: 2500
+tenant_rent_control_percent: 4
+vacancy_rate_percent: 10
 
 # Speculative
-annual_appreciation_percent: 4
+annual_appreciation_percent: 5
 index_fund_annual_return_percent: 10

@@ -5,7 +5,7 @@ import sys
 
 import yaml
 
-from investmentbreakdown import InvestmentBreakdown
+from homeinvestment import HomeInvestment
 
 
 def create_arg_parser():
@@ -22,7 +22,7 @@ def create_arg_parser():
 
 def main(house_params_path):
     house_params = yaml.safe_load(open(house_params_path))
-    investment_breakdown = InvestmentBreakdown(
+    investment_breakdown = HomeInvestment(
         interest_rate_percent=house_params['interest_rate_percent'],
         down_payment_amount=house_params.get('down_payment_amount'),
         down_payment_percent=house_params.get('down_payment_percent'),
@@ -33,13 +33,15 @@ def main(house_params_path):
         homeowners_insurance_rate_percent=house_params['homeowners_insurance_rate_percent'],
         purchase_price=house_params['purchase_price'],
         yearly_income=house_params['yearly_income'],
-        monthly_rent=house_params.get('monthly_rent'),
+        rent=house_params.get('rent'),
+        rent_control_percent=house_params.get('rent_control_percent'),
+        vacancy_rate_percent=house_params.get('vacancy_rate_percent'),
         tenant_rent=house_params.get('tenant_rent'),
+        tenant_rent_control_percent=house_params.get('tenant_rent_control_percent'),
         hoa=house_params.get('hoa'),
         purchase_closing_cost_percent=house_params['purchase_closing_cost_percent'],
         sale_closing_cost_percent=house_params.get('sale_closing_cost_percent'),
         annual_appreciation_percent=house_params.get('annual_appreciation_percent', 0),
-        rent_control_percent=house_params.get('rent_control_percent'),
         index_fund_annual_return_percent=house_params.get('index_fund_annual_return_percent'),
         scenario_name=pathlib.Path(house_params_path).stem,
     )

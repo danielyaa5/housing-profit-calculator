@@ -1,4 +1,6 @@
+import operator
 from decimal import Decimal
+from functools import reduce
 
 
 def range_is_last(start, end):
@@ -20,7 +22,15 @@ def get_decimal(dct, key, default=None):
     return default
 
 
-def compound_interest(principal, interest_rate, years, number):
+def compound_interest(principle, interest_rate, years, number):
     # calculate total amount
-    amount = principal * pow(1 + (interest_rate / number), number * years)
+    amount = principle * pow(1 + (interest_rate / number), number * years)
     return amount
+
+
+def sub(iterable):
+    return reduce(operator.__sub__, iterable)
+
+
+def sum_reduce(f, iterable):
+    return reduce(operator.__add__, map(f, iterable))

@@ -21,7 +21,7 @@ federal_tax_rate_percent: 35
 yearly_income: 500000
 
 # Income
-monthly_rent: 3250
+rent: 3250
 rent_control_percent: 3
 
 # Speculative
