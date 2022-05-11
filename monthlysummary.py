@@ -12,10 +12,8 @@ if TYPE_CHECKING:
 
 
 class MonthlySummary(InvestmentSummary):
-    def __init__(self, home_investment: HomeInvestment, years=None, months=None):
+    def __init__(self, home_investment: HomeInvestment):
         super().__init__(home_investment, 'month')
-        self._years = years
-        self._months = months
 
     def generator(self) -> Generator[MonthSummaryRow, None, None]:
         mortgage = self._home_investment.mortgage
@@ -23,12 +21,6 @@ class MonthlySummary(InvestmentSummary):
 
         for month, principle, interest, deductible_interest in mortgage.monthly_mortgage_schedule():
             year = (month - 1) // c.MONTHS_PER_YEAR + 1
-            if self._years and year > self._years:
-                return
-
-            if self._months and month > self._months:
-                return
-
             last = MonthSummaryRow(
                 home_investment=self._home_investment,
                 month=month,

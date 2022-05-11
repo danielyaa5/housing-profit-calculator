@@ -10,9 +10,8 @@ if TYPE_CHECKING:
 
 
 class YearlySummary(InvestmentSummary):
-    def __init__(self, home_investment: HomeInvestment, years=None):
+    def __init__(self, home_investment: HomeInvestment):
         super().__init__(home_investment, 'year')
-        self._years = years
 
     def generator(self) -> Generator[YearSummaryRow, None, None]:
         months = []

@@ -137,6 +137,7 @@ class HomeInvestment(object):
         table.append(['Yearly property tax', f'{self.property_tax_yearly} ({self.property_tax_rate_percent})'])
         table.append(['Purchase closing cost', f'{self.purchase_closing_cost} ({self.purchase_closing_cost_percent})'])
         table.append(['HOA', f'{self.hoa}'])
+        table.append(['Monthly maintenance fee', f'{self.maintenance_fee}'])
         table.append(['Monthly rent', f'{self.initial_rent}'])
         table.append(['Rent control', f'{self.rent_control_percent}'])
         table.append(['Tenant rent', f'{self.initial_tenant_rent}'])
@@ -203,11 +204,13 @@ class HomeInvestment(object):
     def monthly_appreciation(self, year):
         return self.yearly_appreciation(year) / c.MONTHS_PER_YEAR
 
-    def monthly(self, years=None, months=None):
-        return MonthlySummary(years=years, months=months, home_investment=self)
+    @functools.cache
+    def monthly(self):
+        return MonthlySummary(home_investment=self)
 
-    def yearly(self, years=None):
-        return YearlySummary(home_investment=self, years=years)
+    @functools.cache
+    def yearly(self):
+        return YearlySummary(home_investment=self)
 
     def rent(self, year):
         return compound_interest(self.initial_rent, self.rent_control_rate, year - 1, 1)

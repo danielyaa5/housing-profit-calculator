@@ -61,9 +61,11 @@ def main(house_params_path):
     investment_breakdown.monthly().csv_cashflow_negative()
     investment_breakdown.monthly().csv_cashflow_positive()
     investment_breakdown.monthly().csv_investment()
+    investment_breakdown.monthly().csv_investment_short()
 
     investment_breakdown.yearly().csv()
     investment_breakdown.yearly().csv_investment()
+    investment_breakdown.yearly().csv_investment_short()
 
 
 if __name__ == '__main__':

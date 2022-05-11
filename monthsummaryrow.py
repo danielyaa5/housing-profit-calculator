@@ -78,9 +78,12 @@ class MonthSummaryRow(SummaryRow):
         self.equity = self.appreciation + self.principle_paid + home_investment.down_payment
         self.home_investment_value = self.net_cashflow_positive + self.equity - self.net_expenses - self.sale_closing_cost
 
+        if self.monthly_cashflow > 0:
+            raise Exception(f'Monthly Cashflow is positive: {self.monthly_cashflow}, logic for this has not been implemented')
+
         # Index Fund Value
         self.index_fund_value = compound_interest(
-            principle=index_fund_value + self.monthly_cashflow,
+            principle=index_fund_value + -self.monthly_cashflow,
             interest_rate=home_investment.index_fund_annual_return_rate,
             years=Decimal(1 / c.MONTHS_PER_YEAR),
             number=Decimal(c.MONTHS_PER_YEAR)

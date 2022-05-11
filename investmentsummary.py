@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import functools
 import os
 import pathlib
 from abc import ABC, abstractmethod
@@ -41,9 +42,11 @@ class InvestmentSummary(ABC, object):
     def generator(self) -> Generator[SummaryRow, None, None]:
         raise NotImplementedError
 
+    @functools.cache
     def dicts(self):
-        return map(lambda bd: bd.dict(), self.generator())
+        return list(map(lambda bd: bd.dict(), self.generator()))
 
+    @functools.cache
     def list(self):
         return list(self.generator())
 
@@ -116,6 +119,23 @@ class InvestmentSummary(ABC, object):
         ]
 
         filename = f'{self._home_investment.scenario_name}_{self.time_length}_investment.csv'
+        output_path = self._csv(filename=filename, columns=columns)
+        return output_path
+
+    def csv_investment_short(self):
+        columns = [
+            'cashflow',
+            'net_cashflow',
+            'appreciated_price',
+            'equity',
+            'home_investment_value',
+            'home_roi',
+            'index_fund_value',
+            'index_fund_roi',
+            'home_investment_vs_index_fund_roi'
+        ]
+
+        filename = f'{self._home_investment.scenario_name}_{self.time_length}_investment_short.csv'
         output_path = self._csv(filename=filename, columns=columns)
         return output_path
 
