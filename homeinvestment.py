@@ -79,8 +79,8 @@ class HomeInvestment(object):
         self.sale_closing_cost = DecimalDollar(self.sale_closing_cost_percent * purchase_price)
         self.property_tax_yearly = DecimalDollar(self.property_tax_rate * self.purchase_price)
         self.property_tax = DecimalDollar(self.property_tax_yearly / c.MONTHS_PER_YEAR)
-        self.home_insurance_yearly = DecimalDollar(self.homeowners_insurance_rate * self.purchase_price)
-        self.home_insurance = DecimalDollar(self.home_insurance_yearly / c.MONTHS_PER_YEAR)
+        self.hoi_yearly = DecimalDollar(self.homeowners_insurance_rate * self.purchase_price)
+        self.hoi = DecimalDollar(self.hoi_yearly / c.MONTHS_PER_YEAR)
         self.mortgage = Mortgage(
             interest_rate=self.interest_rate, loan_amount=self.loan_amount, loan_term_months=self.loan_term_months
         )
@@ -108,7 +108,7 @@ class HomeInvestment(object):
         table.append(['Loan amount', f'{self.loan_amount}'])
         table.append(['Loan term', f'{self.loan_term_years} years ({self.loan_term_months} months)'])
         table.append(['Yearly homeowners insurance',
-                      f'{self.home_insurance_yearly} ({self.homeowners_insurance_rate_percent})'])
+                      f'{self.hoi_yearly} ({self.homeowners_insurance_rate_percent})'])
         table.append(['Yearly property tax', f'{self.property_tax_yearly} ({self.property_tax_rate_percent})'])
         table.append(['Purchase closing cost', f'{self.purchase_closing_cost} ({self.purchase_closing_cost_percent})'])
         table.append(['HOA', f'{self.hoa}'])
@@ -181,5 +181,5 @@ class HomeInvestment(object):
     def tenant_rent(self, year):
         return compound_interest(self.initial_tenant_rent, self.tenant_rent_control_rate, year - 1, 1)
 
-    def vacancy_cost(self, year):
+    def vacancy(self, year):
         return self.tenant_rent(year) * self.vacancy_rate

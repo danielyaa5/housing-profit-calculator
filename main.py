@@ -5,6 +5,7 @@ import sys
 
 import yaml
 
+from helpers import folder_del_contents
 from homeinvestment import HomeInvestment
 
 
@@ -16,6 +17,11 @@ def create_arg_parser():
         help='Path to a yaml file describing the input parameters, such as house price and interest rate',
         required=True,
         type=os.path.abspath
+    )
+    parser.add_argument(
+        '-d', '--delete-output',
+        help='Delete everything in the output directory',
+        action='store_true'
     )
     return parser
 
@@ -49,13 +55,25 @@ def main(house_params_path):
     print(f'Calculating monthly mortgage payments for:')
     print('\n')
     investment_breakdown.describe()
+
     investment_breakdown.monthly().csv()
+    investment_breakdown.monthly().csv_cashflow_negative()
+    investment_breakdown.monthly().csv_cashflow_positive()
+    investment_breakdown.monthly().csv_investment()
+
     investment_breakdown.yearly().csv()
+    investment_breakdown.yearly().csv_investment()
 
 
 if __name__ == '__main__':
     arg_parser = create_arg_parser()
     parsed_args = arg_parser.parse_args(sys.argv[1:])
     assert os.path.exists(parsed_args.input), 'Input directory does not exist'
+
+    # Delete everything in the output directory if the user requested it
+    if parsed_args.delete_output:
+        dirname = os.path.join(pathlib.Path(__file__).parent.resolve(), 'output')
+        folder_del_contents(dirname)
+
     # Parse yaml file with input parameters
     main(parsed_args.input)

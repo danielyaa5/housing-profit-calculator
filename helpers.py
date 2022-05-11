@@ -1,4 +1,6 @@
 import operator
+import os
+import shutil
 from decimal import Decimal
 from functools import reduce
 
@@ -34,3 +36,12 @@ def sub(iterable):
 
 def sum_reduce(f, iterable):
     return reduce(operator.__add__, map(f, iterable))
+
+
+def folder_del_contents(path):
+    for filename in os.listdir(path):
+        file_path = os.path.join(path, filename)
+        if os.path.isfile(file_path) or os.path.islink(file_path):
+            os.unlink(file_path)
+        elif os.path.isdir(file_path):
+            shutil.rmtree(file_path)
