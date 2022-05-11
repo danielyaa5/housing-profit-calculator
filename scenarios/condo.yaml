@@ -9,6 +9,7 @@ sale_closing_cost_percent: 8
 # Monthly Recurring Costs
 homeowners_insurance_rate_percent: 0.22
 hoa: 325
+maintenance_fee_percent: 0.2
 
 # Loan
 loan_term_years: 30
@@ -22,8 +23,8 @@ yearly_income: 500000
 
 # Income
 rent: 3250
-rent_control_percent: 5
+rent_control_percent: 3
 
 # Speculative
-annual_appreciation_percent: 3
+annual_appreciation_percent: 2
 index_fund_annual_return_percent: 10

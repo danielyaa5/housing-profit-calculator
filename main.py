@@ -47,9 +47,10 @@ def main(house_params_path):
         hoa=house_params.get('hoa'),
         purchase_closing_cost_percent=house_params['purchase_closing_cost_percent'],
         sale_closing_cost_percent=house_params.get('sale_closing_cost_percent'),
-        annual_appreciation_percent=house_params.get('annual_appreciation_percent', 0),
+        annual_appreciation_percent=house_params.get('annual_appreciation_percent'),
         index_fund_annual_return_percent=house_params.get('index_fund_annual_return_percent'),
         scenario_name=pathlib.Path(house_params_path).stem,
+        maintenance_fee_percent=house_params.get('maintenance_fee_percent'),
     )
     print('\n')
     print(f'Calculating monthly mortgage payments for:')

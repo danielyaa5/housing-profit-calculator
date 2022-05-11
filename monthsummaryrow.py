@@ -43,12 +43,14 @@ class MonthSummaryRow(SummaryRow):
         self.monthly_hoi = home_investment.hoi
         self.monthly_hoa = home_investment.hoa
         self.monthly_vacancy = home_investment.vacancy(year)
+        self.monthly_maintenance_fee = home_investment.maintenance_fee
         self.monthly_expenses = sum([
             self.monthly_interest,
             self.monthly_property_tax,
             self.monthly_hoi,
             self.monthly_hoa,
-            self.monthly_vacancy
+            self.monthly_vacancy,
+            self.monthly_maintenance_fee
         ])
         self.monthly_cashflow_negative = principle + self.monthly_expenses
 

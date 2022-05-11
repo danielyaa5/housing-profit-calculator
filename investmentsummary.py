@@ -69,6 +69,7 @@ class InvestmentSummary(ABC, object):
             'hoi',
             'hoa',
             'vacancy',
+            'maintenance_fee',
             'expenses',
             'net_expenses',
             'cashflow_negative',

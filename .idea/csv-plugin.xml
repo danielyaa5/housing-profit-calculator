@@ -52,6 +52,13 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="/output/condo_year_investment.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="/output/condo_year_investment_comp.csv">
           <value>
             <Attribute>

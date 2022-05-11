@@ -1,3 +1,4 @@
+import functools
 from decimal import Decimal
 
 import pandas as pd
@@ -40,11 +41,15 @@ class HomeInvestment(object):
             annual_appreciation_percent,
             scenario_name,
             hoa,
-            index_fund_annual_return_percent
+            index_fund_annual_return_percent,
+            maintenance_fee_percent,
     ):
+        self.scenario_name = scenario_name
+
+        # Loan
+        assert loan_term_years % 1 == 0, 'loan_term_years must be a whole number'
         self.interest_rate_percent = DecimalPercent(interest_rate_percent)
         self.interest_rate = self.interest_rate_percent / 100
-        assert loan_term_years % 1 == 0, 'loan_term_years must be an integer'
         self.loan_term_years = int(loan_term_years)
         self.loan_term_months = self.loan_term_years * c.MONTHS_PER_YEAR
         self.purchase_price = DecimalDollar(purchase_price)
@@ -53,52 +58,72 @@ class HomeInvestment(object):
             down_payment_percent or float(self.down_payment / self.purchase_price * 100)
         )
         self.loan_amount = DecimalDollar(self.purchase_price - self.down_payment)
+        self.mortgage = Mortgage(
+            interest_rate=self.interest_rate,
+            loan_amount=self.loan_amount,
+            loan_term_months=self.loan_term_months
+        )
+
+        # ======================
+        # = Positive Cash Flow =
+        # ======================
+
+        # Taxes
         self.federal_tax_rate_percent = DecimalPercent(federal_tax_rate_percent)
         self.federal_tax_rate = Decimal(self.federal_tax_rate_percent) / 100
         self.state_tax_rate_percent = DecimalPercent(state_tax_rate_percent)
         self.state_tax_rate = Decimal(self.state_tax_rate_percent) / 100
         self.property_tax_rate_percent = DecimalPercent(property_tax_rate_percent)
         self.property_tax_rate = Decimal(self.property_tax_rate_percent) / 100
-        self.homeowners_insurance_rate_percent = DecimalPercent(homeowners_insurance_rate_percent)
-        self.homeowners_insurance_rate = Decimal(self.homeowners_insurance_rate_percent) / 100
         self.yearly_income = DecimalDollar(yearly_income)
+        self.tax_deduction_per_year = self._calculate_tax_deduction_per_year()
+        self.federal_standard_deduction = FEDERAL_TAXES['standard_deduction']
+        self.state_standard_deduction = STATE_TAXES['standard_deduction']
+
+        # Rent
         self.initial_rent = DecimalDollar(rent)
         self.rent_control_percent = DecimalPercent(rent_control_percent or 0)
         self.rent_control_rate = Decimal(rent_control_percent) / 100
         self.initial_tenant_rent = DecimalDollar(tenant_rent or 0)
         self.tenant_rent_control_percent = DecimalPercent(tenant_rent_control_percent or 0)
         self.tenant_rent_control_rate = self.tenant_rent_control_percent / 100
+
+        # ======================
+        # = Negative Cash Flow =
+        # ======================
+
+        # Recurring Costs
+        self.homeowners_insurance_rate_percent = DecimalPercent(homeowners_insurance_rate_percent)
+        self.homeowners_insurance_rate = Decimal(self.homeowners_insurance_rate_percent) / 100
         self.vacancy_rate_percent = DecimalPercent(vacancy_rate_percent or 0)
         self.vacancy_rate = Decimal(self.vacancy_rate_percent / 100)
         self.hoa = DecimalDollar(hoa or 0)
+        self.maintenance_fee_percent = DecimalPercent(maintenance_fee_percent or 0)
+        self.maintenance_fee_rate = Decimal(self.maintenance_fee_percent) / 100
+        self.maintenance_fee_yearly = DecimalDollar(self.maintenance_fee_rate * self.purchase_price)
+        self.maintenance_fee = self.maintenance_fee_yearly / c.MONTHS_PER_YEAR
+        self.property_tax_yearly = DecimalDollar(self.property_tax_rate * self.purchase_price)
+        self.property_tax = DecimalDollar(self.property_tax_yearly / c.MONTHS_PER_YEAR)
+        self.hoi_yearly = DecimalDollar(self.homeowners_insurance_rate * self.purchase_price)
+        self.hoi = DecimalDollar(self.hoi_yearly / c.MONTHS_PER_YEAR)
+
+        # Onetime Costs
         self.purchase_closing_cost_percent = DecimalPercent(purchase_closing_cost_percent)
         self.purchase_closing_cost_rate = Decimal(self.purchase_closing_cost_percent) / 100
         self.purchase_closing_cost = DecimalDollar(self.purchase_price * self.purchase_closing_cost_rate)
         self.sale_closing_cost_percent = DecimalPercent(sale_closing_cost_percent)
         self.sale_closing_cost_rate = Decimal(sale_closing_cost_percent / 100)
         self.sale_closing_cost = DecimalDollar(self.sale_closing_cost_percent * purchase_price)
-        self.property_tax_yearly = DecimalDollar(self.property_tax_rate * self.purchase_price)
-        self.property_tax = DecimalDollar(self.property_tax_yearly / c.MONTHS_PER_YEAR)
-        self.hoi_yearly = DecimalDollar(self.homeowners_insurance_rate * self.purchase_price)
-        self.hoi = DecimalDollar(self.hoi_yearly / c.MONTHS_PER_YEAR)
-        self.mortgage = Mortgage(
-            interest_rate=self.interest_rate, loan_amount=self.loan_amount, loan_term_months=self.loan_term_months
-        )
-        self.tax_deduction_per_year = self.calculate_tax_deduction_per_year()
-        self.annual_appreciation_percent = DecimalPercent(annual_appreciation_percent)
-        self.annual_appreciation_rate = self.annual_appreciation_percent / 100
+        self.initial_cost = self.down_payment + self.purchase_closing_cost
 
-        self._federal_tax_savings_per_year = self.calculate_tax_savings_per_year(
-            self.federal_tax_rate, FEDERAL_TAXES['standard_deduction']
-        )
-        self._state_tax_savings_per_year = self.calculate_tax_savings_per_year(
-            self.state_tax_rate, STATE_TAXES['standard_deduction']
-        )
-        self._yearly_appreciated_price = self.calculate_yearly_appreciated_price()
+        # ====================
+        # = Investment Value =
+        # ====================
+
+        self.annual_appreciation_percent = DecimalPercent(annual_appreciation_percent or 0)
+        self.annual_appreciation_rate = self.annual_appreciation_percent / 100
         self.index_fund_annual_return_percent = DecimalPercent(index_fund_annual_return_percent or 10)
         self.index_fund_annual_return_rate = Decimal(index_fund_annual_return_percent) / 100
-        self.initial_cost = self.down_payment + self.purchase_closing_cost
-        self.scenario_name = scenario_name
 
     def describe(self):
         table = []
@@ -123,7 +148,7 @@ class HomeInvestment(object):
         print(tabulate(pd.DataFrame(table), showindex=False))
         print('\n')
 
-    def calculate_tax_deduction_per_year(self):
+    def _calculate_tax_deduction_per_year(self):
         result = []
         property_tax = self.property_tax_rate * self.purchase_price
         for year_num, principle, interest, deductible_interest in self.mortgage.yearly_mortgage_schedule():
@@ -133,7 +158,7 @@ class HomeInvestment(object):
 
         return result
 
-    def calculate_tax_savings_per_year(self, tax_rate, standard_deduction):
+    def _calculate_tax_savings_per_year(self, tax_rate, standard_deduction):
         result = []
         for tax_deduction in self.tax_deduction_per_year:
             itemized_savings = tax_rate * tax_deduction
@@ -147,13 +172,22 @@ class HomeInvestment(object):
 
         return result
 
+    @functools.cached_property
+    def federal_tax_savings_per_year(self):
+        return self._calculate_tax_savings_per_year(self.federal_tax_rate, self.federal_standard_deduction)
+
+    @functools.cached_property
+    def state_tax_savings_per_year(self):
+        return self._calculate_tax_savings_per_year(self.state_tax_rate, self.state_standard_deduction)
+
     def federal_tax_savings(self, year):
-        return self._federal_tax_savings_per_year[year - 1]
+        return self.federal_tax_savings_per_year[year - 1]
 
     def state_tax_savings(self, year):
-        return self._state_tax_savings_per_year[year - 1]
+        return self.state_tax_savings_per_year[year - 1]
 
-    def calculate_yearly_appreciated_price(self):
+    @functools.cached_property
+    def appreciated_price_per_year(self):
         return [self.purchase_price] + [
             DecimalDollar(
                 compound_interest(self.purchase_price, self.annual_appreciation_rate, year, 1)
@@ -161,10 +195,10 @@ class HomeInvestment(object):
         ]
 
     def appreciated_price(self, year):
-        return self._yearly_appreciated_price[year - 1]
+        return self.appreciated_price_per_year[year]
 
     def yearly_appreciation(self, year):
-        return self.appreciated_price(year + 1) - self.appreciated_price(year)
+        return self.appreciated_price(year) - self.appreciated_price(year - 1)
 
     def monthly_appreciation(self, year):
         return self.yearly_appreciation(year) / c.MONTHS_PER_YEAR
