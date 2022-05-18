@@ -9,42 +9,25 @@ from typing import TYPE_CHECKING, Generator, Literal
 import pandas as pd
 from tabulate import tabulate
 
-from decimaldollar import DecimalDollar
-from decimalpercent import DecimalPercent
+from src.breakdown.row import BreakdownRow
+from src.helpers import rel
 
 if TYPE_CHECKING:
-    from homeinvestment import HomeInvestment
+    from src.homeinvestment import HomeInvestment
 
 
-class SummaryRow(ABC, object):
-    def dict(self):
-        def should_fmt(v):
-            return isinstance(v, DecimalDollar) or isinstance(v, DecimalPercent)
-
-        def _key(k):
-            if k.startswith('monthly_'):
-                return k[8:]
-            if k.startswith('yearly_'):
-                return k[7:]
-            return k
-
-        return {
-            _key(k): (f'{v}' if should_fmt(v) else v) for (k, v) in self.__dict__.items() if not k.startswith('_')
-        }
-
-
-class InvestmentSummary(ABC, object):
+class BreakdownFor(ABC, object):
     def __init__(self, home_investment: HomeInvestment, time_length: Literal['month', 'year']):
         self._home_investment = home_investment
         self.time_length = time_length
 
     @abstractmethod
-    def generator(self) -> Generator[SummaryRow, None, None]:
+    def generator(self) -> Generator[BreakdownRow, None, None]:
         raise NotImplementedError
 
     @functools.cache
     def dicts(self):
-        return list(map(lambda bd: bd.dict(), self.generator()))
+        return list(map(lambda bd: bd.dict(), self.list()))
 
     @functools.cache
     def list(self):
@@ -72,7 +55,8 @@ class InvestmentSummary(ABC, object):
             'hoi',
             'hoa',
             'vacancy',
-            'maintenance_fee',
+            'maintenance',
+            'management_fee',
             'expenses',
             'net_expenses',
             'cashflow_negative',
@@ -84,9 +68,8 @@ class InvestmentSummary(ABC, object):
 
     def csv_cashflow_positive(self):
         columns = [
+            'month',
             'deductible_interest',
-            'state_tax_savings',
-            'federal_tax_savings',
             'tax_savings',
             'rent',
             'tenant_rent',
@@ -111,6 +94,7 @@ class InvestmentSummary(ABC, object):
             'principle_paid',
             'sale_closing_cost',
             'equity',
+            'cashflow_surplus_index_fund_value',
             'home_investment_value',
             'home_roi',
             'index_fund_value',
@@ -140,8 +124,7 @@ class InvestmentSummary(ABC, object):
         return output_path
 
     def _csv(self, filename, columns=None):
-        dirname = pathlib.Path(__file__).parent.resolve()
-        output_path = os.path.join(dirname, 'output', filename)
+        output_path = rel('../../output', filename)
         print(f'Outputting {filename} to {output_path}\n')
         self.df(columns).to_csv(output_path, index=False)
         return output_path

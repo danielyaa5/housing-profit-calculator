@@ -1,8 +1,11 @@
+import inspect
 import operator
 import os
 import shutil
 from decimal import Decimal
 from functools import reduce
+
+import yaml
 
 
 def range_is_last(start, end):
@@ -24,10 +27,14 @@ def get_decimal(dct, key, default=None):
     return default
 
 
-def compound_interest(principle, interest_rate, years, number):
+def compound_interest(principle, rate, years, number):
     # calculate total amount
-    amount = principle * pow(1 + (interest_rate / number), number * years)
+    amount = principle * pow(1 + (rate / number), number * years)
     return amount
+
+
+def compound_yearly(principle, rate, year):
+    return compound_interest(principle, rate, year, 1)
 
 
 def sub(iterable):
@@ -45,3 +52,14 @@ def folder_del_contents(path):
             os.unlink(file_path)
         elif os.path.isdir(file_path):
             shutil.rmtree(file_path)
+
+
+def rel(*path):
+    caller_filepath = inspect.stack()[1].filename
+    caller_dirname = os.path.dirname(caller_filepath)
+    return os.path.realpath(os.path.join(caller_dirname, *path))
+
+
+def yaml_safe_load(path):
+    with open(path) as f:
+        return yaml.safe_load(f)

@@ -2,22 +2,22 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Generator
 
-from investmentsummary import InvestmentSummary
-from yearsummaryrow import YearSummaryRow
+from src.breakdown.breakdownfor import BreakdownFor
+from src.breakdown.rowyear import RowYear
 
 if TYPE_CHECKING:
-    from homeinvestment import HomeInvestment
+    from src.homeinvestment import HomeInvestment
 
 
-class YearlySummary(InvestmentSummary):
+class BreakdownForYear(BreakdownFor):
     def __init__(self, home_investment: HomeInvestment):
         super().__init__(home_investment, 'year')
 
-    def generator(self) -> Generator[YearSummaryRow, None, None]:
+    def generator(self) -> Generator[RowYear, None, None]:
         months = []
-        for month_bd in self._home_investment.monthly().generator():
+        for month_bd in self._home_investment.breakdown().monthly().generator():
             months.append(month_bd)
 
             if month_bd.is_last_month() or month_bd.is_full_year():
-                yield YearSummaryRow(months)
+                yield RowYear(months)
                 months = []

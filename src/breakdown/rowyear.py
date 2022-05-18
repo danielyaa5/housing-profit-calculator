@@ -1,9 +1,9 @@
-from investmentsummary import SummaryRow
-from monthsummaryrow import MonthSummaryRow
+from src.breakdown.row import BreakdownRow
+from src.breakdown.rowmonth import RowMonth
 
 
-class YearSummaryRow(SummaryRow):
-    def __init__(self, months: list[MonthSummaryRow]):
+class RowYear(BreakdownRow):
+    def __init__(self, months: list[RowMonth]):
         for month in months:
             for month_k, v in month.__dict__.items():
                 if month_k.startswith('_'):

@@ -1,7 +1,7 @@
 # Upfront Costs
 purchase_price: 1200000
 down_payment_percent: 20
-#down_payment_amount: 450000
+#down_payment: 450000
 purchase_closing_cost_percent: 2
 
 # Closing Cost
@@ -23,7 +23,7 @@ yearly_income: 300000
 
 # Income
 rent: 0
-#rent_control_percent: 3
+#rent_annual_increase_rate: 3
 tenant_rent: 5000
 
 # Speculative
