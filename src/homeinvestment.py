@@ -77,17 +77,38 @@ def _create_describe_tables(i: HomeInvestment):
         ),
         dict(
             header='Operating Expenses Params',
-            columns=['', 'Initial Monthly', 'Annual Increase'],
+            columns=['', 'Initial Monthly', 'Initial Yearly', 'Annual Increase'],
             table=[
-                ['Property Tax', f'{expenses.property_tax[1]} [{expenses.property_tax_rate.percent}]',
-                 f'{i.taxes.property_tax_annual_increase_rate.percent}'],
-                ['HOI', f'{expenses.hoi[1]} [{expenses.hoi_rate.percent}]',
-                 f'{expenses.hoi_annual_increase_rate.percent}'],
-                ['HOA', f'{expenses.hoa[1]}', f'{expenses.hoa_annual_increase_rate.percent}'],
-                ['Maintenance', f'{expenses.maintenance[1]} [{expenses.maintenance_rate.percent}]',
-                 f'{expenses.maintenance_annual_increase_rate.percent}'],
-                ['Other Costs', f'{expenses.other[1]} [{expenses.other_rate.percent}]',
-                 f'{expenses.other_annual_increase_rate.percent}'],
+                [
+                    'Property Tax',
+                    f'{expenses.property_tax[1]} [{expenses.property_tax_rate.percent}]',
+                    f'{expenses.property_tax.full_year(0)}',
+                    f'{i.taxes.property_tax_annual_increase_rate.percent}'
+                ],
+                [
+                    'HOI',
+                    f'{expenses.hoi[1]} [{expenses.hoi_rate.percent}]',
+                    f'{expenses.hoi.full_year(0)}',
+                    f'{expenses.hoi_annual_increase_rate.percent}'
+                ],
+                [
+                    'HOA',
+                    f'{expenses.hoa[1]}',
+                    f'{expenses.hoa.full_year(0)}',
+                    f'{expenses.hoa_annual_increase_rate.percent}'
+                ],
+                [
+                    'Maintenance',
+                    f'{expenses.maintenance[1]} [{expenses.maintenance_rate.percent}]',
+                    f'{expenses.maintenance.full_year(0)}',
+                    f'{expenses.maintenance_annual_increase_rate.percent}'
+                ],
+                [
+                    'Other Costs',
+                    f'{expenses.other[1]} [{expenses.other_rate.percent}]',
+                    f'{expenses.other.full_year(0)}',
+                    f'{expenses.other_annual_increase_rate.percent}'
+                ],
             ]
         ),
         dict(

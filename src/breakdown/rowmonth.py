@@ -22,13 +22,14 @@ class RowMonth(BreakdownRow):
             principle,
             interest,
             deductible_interest,
-            net_expenses,
-            net_cashflow_positive,
+            net_operating_cost,
+            net_income,
             net_cashflow,
             principle_paid,
+            interest_paid,
             appreciated_price,
             index_fund_value,
-            cashflow_surplus_index_fund_value: Dollar,
+            cashflow_surplus_index_fund_value,
     ):
         # Private
         purchase = home_investment.purchase
@@ -52,8 +53,7 @@ class RowMonth(BreakdownRow):
         self.monthly_vacancy = operating_expenses.vacancy(month=month)
         self.monthly_maintenance = operating_expenses.maintenance[month]
         self.monthly_management_fee = operating_expenses.management_fee(month=month)
-        self.monthly_expenses = purchase.closing_cost if month == 0 else sum([
-            self.monthly_interest,
+        self.monthly_operating_cost = sum([
             self.monthly_property_tax,
             self.monthly_hoi,
             self.monthly_hoa,
@@ -61,32 +61,37 @@ class RowMonth(BreakdownRow):
             self.monthly_maintenance,
             self.monthly_management_fee,
         ])
-        if month == 0:
-            self.monthly_cashflow_negative = purchase.down_payment + purchase.closing_cost
-        else:
-            self.monthly_cashflow_negative = principle + self.monthly_expenses
+        self.net_operating_cost = self.monthly_operating_cost + net_operating_cost
+        self.monthly_expenses = sum([
+            self.monthly_property_tax,
+            self.monthly_hoi,
+            self.monthly_hoa,
+            self.monthly_maintenance,
+        ])
 
         # Cashflow Positive
         self.monthly_deductible_interest = deductible_interest
         self.monthly_tax_savings = income.tax_savings_per_month[month]
         self.monthly_rent = income.rent[month]
         self.monthly_tenant_rent = income.tenant_rent[month]
-        if month == 0:
-            self.monthly_cashflow_positive = Dollar(0)
-        else:
-            self.monthly_cashflow_positive = self.monthly_tax_savings + self.monthly_rent + self.monthly_tenant_rent
+        self.monthly_income = self.monthly_tax_savings + self.monthly_rent + self.monthly_tenant_rent
+        self.monthly_adjusted_income = self.monthly_income - self.monthly_vacancy - self.monthly_management_fee
 
         # Cashflow
-        self.net_cashflow_positive = net_cashflow_positive + self.monthly_cashflow_positive
-        self.net_expenses = self.monthly_expenses + net_expenses
-        self.monthly_cashflow = self.monthly_cashflow_positive - self.monthly_cashflow_negative
+        self.net_income = net_income + self.monthly_income
+        if month == 0:
+            self.monthly_cashflow = -(purchase.down_payment + purchase.closing_cost)
+        else:
+            self.monthly_cashflow = self.monthly_income - self.monthly_operating_cost - self.monthly_mortgage
         self.net_cashflow = net_cashflow + self.monthly_cashflow
 
         # Home Investment Value
+        self.appreciated_price = purchase.price if month == 0 else appreciated_price
         self.monthly_appreciation = sale.appreciation_per_month(year=year)
-        self.appreciated_price = appreciated_price + self.monthly_appreciation
+        self.appreciated_price = self.appreciated_price + self.monthly_appreciation
         self.appreciation = self.appreciated_price - purchase.price
         self.principle_paid = principle_paid + principle
+        self.interest_paid = interest_paid + interest
         self.sale_closing_cost = self.appreciated_price * sale.closing_cost_rate
         self.equity = self.appreciation + self.principle_paid + purchase.down_payment
         self.cashflow_surplus_index_fund_value = cashflow_surplus_index_fund_value
@@ -101,7 +106,8 @@ class RowMonth(BreakdownRow):
         if self.monthly_cashflow > 0:
             self.cashflow_surplus_index_fund_value += self.monthly_cashflow
 
-        self.home_investment_value = self.net_cashflow_positive + self.equity - self.net_expenses - self.sale_closing_cost + self.cashflow_surplus_index_fund_value
+        self.cash_to_receive = self.equity - self.sale_closing_cost
+        self.home_investment_value = self.cash_to_receive + self.cashflow_surplus_index_fund_value - self.net_operating_cost - self.interest_paid
 
         # Index Fund Value
         self.index_fund_value = index_fund_value
@@ -119,10 +125,10 @@ class RowMonth(BreakdownRow):
         # Home Investment vs Index Fund ROI Comparison
         self.home_roi = Percent(self.home_investment_value / purchase.cost_initial * 100 - 100)
         self.index_fund_roi = Percent(self.index_fund_value / purchase.cost_initial * 100 - 100)
-        self.home_investment_vs_index_fund_roi = self.home_roi - self.index_fund_roi
+        self.score = Percent(self.home_investment_value / self.index_fund_value * 100 - 100)
 
     def is_last_month(self):
-        return self._home_investment.mortgage.loan_term == self.month
+        return self._home_investment.mortgage.loan_term_months == self.month
 
     def is_full_year(self):
         return self.month % c.MONTHS_PER_YEAR == 0

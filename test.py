@@ -1,4 +1,4 @@
-from src.helpers import folder_del_contents, rel
+from src.helpers import folder_del_contents, rel, compound_interest
 from src.homeinvestment import HomeInvestment
 from src.income import income
 from src.mortgage import mortgage
@@ -10,9 +10,9 @@ from src.taxes import taxes
 
 def test_home_investment_condo():
     return HomeInvestment(
-        scenario_name='test_home_investment_condo',
+        scenario_name='home_investment_condo',
         purchase=purchase(
-            price=890 * 1000,
+            price=800 * 1000,
             down_payment=None,
             down_payment_percent=20,
             closing_cost_percent=2
@@ -48,15 +48,15 @@ def test_home_investment_condo():
         ),
         sale=sale(
             closing_cost_percent=8,
-            annual_appreciation_percent=5,
+            annual_appreciation_percent=3,
         ),
-        index_fund_annual_return_percent=10,
+        index_fund_annual_return_percent=8,
     )
 
 
 def test_home_investment_low_interest_house():
     return HomeInvestment(
-        scenario_name='test_home_investment_low_interest_house',
+        scenario_name='home_investment_low_interest_house',
         purchase=purchase(
             price=900 * 1000,
             down_payment=None,
@@ -102,9 +102,9 @@ def test_home_investment_low_interest_house():
 
 def test_home_investment_low_interest_house_fully_rented():
     return HomeInvestment(
-        scenario_name='test_home_investment_low_interest_house_fully_rented',
+        scenario_name='home_investment_low_interest_house_fully_rented',
         purchase=purchase(
-            price=870 * 1000,
+            price=850 * 1000,
             down_payment=None,
             down_payment_percent=20,
             closing_cost_percent=2
@@ -134,15 +134,15 @@ def test_home_investment_low_interest_house_fully_rented():
             rent=None,
             rent_annual_increase_percent=None,
             tenant_rent=4500,
-            tenant_rent_annual_increase_percent=4,
+            tenant_rent_annual_increase_percent=3,
             vacancy_percent=5,
-            management_fee_percent=5,
+            management_fee_percent=8,
         ),
         sale=sale(
             closing_cost_percent=8,
-            annual_appreciation_percent=4,
+            annual_appreciation_percent=5,
         ),
-        index_fund_annual_return_percent=10,
+        index_fund_annual_return_percent=9,
     )
 
 
@@ -151,6 +151,11 @@ if __name__ == '__main__':
     print('testing...')
     hi = test_home_investment_low_interest_house_fully_rented()
     hi.describe()
-    hi.breakdown.monthly.csv_cashflow_positive()
-    hi.breakdown.monthly.csv_cashflow_negative()
+    hi.breakdown.yearly.csv_income()
+    hi.breakdown.yearly.csv_operating_cost()
+    hi.breakdown.yearly.csv_cashflow()
+    hi.breakdown.yearly.csv_investment()
+    hi.breakdown.monthly.csv_income()
+    hi.breakdown.monthly.csv_operating_cost()
+    hi.breakdown.monthly.csv_cashflow()
     hi.breakdown.monthly.csv_investment()

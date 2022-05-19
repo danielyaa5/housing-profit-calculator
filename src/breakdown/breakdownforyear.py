@@ -15,9 +15,9 @@ class BreakdownForYear(BreakdownFor):
 
     def generator(self) -> Generator[RowYear, None, None]:
         months = []
-        for month_bd in self._home_investment.breakdown().monthly().generator():
+        for month_bd in self._home_investment.breakdown.monthly.generator():
             months.append(month_bd)
 
             if month_bd.is_last_month() or month_bd.is_full_year():
-                yield RowYear(months)
+                yield RowYear(months, self._home_investment.purchase)
                 months = []

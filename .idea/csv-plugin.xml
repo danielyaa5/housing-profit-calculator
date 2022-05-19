@@ -3,63 +3,49 @@
   <component name="CsvFileAttributes">
     <option name="attributeMap">
       <map>
-        <entry key="/output/test_home_investment_condo_month_cf_neg.csv">
+        <entry key="/output/home_investment_low_interest_house_fully_rented/month/income.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
             </Attribute>
           </value>
         </entry>
-        <entry key="/output/test_home_investment_condo_month_cf_pos.csv">
+        <entry key="/output/home_investment_low_interest_house_fully_rented/month/investment.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
             </Attribute>
           </value>
         </entry>
-        <entry key="/output/test_home_investment_condo_month_investment.csv">
+        <entry key="/output/home_investment_low_interest_house_fully_rented/month/operating_cost.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
             </Attribute>
           </value>
         </entry>
-        <entry key="/output/test_home_investment_low_interest_house_fully_rented_month_cf_neg.csv">
+        <entry key="/output/home_investment_low_interest_house_fully_rented/year/cashflow.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
             </Attribute>
           </value>
         </entry>
-        <entry key="/output/test_home_investment_low_interest_house_fully_rented_month_cf_pos.csv">
+        <entry key="/output/home_investment_low_interest_house_fully_rented/year/income.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
             </Attribute>
           </value>
         </entry>
-        <entry key="/output/test_home_investment_low_interest_house_fully_rented_month_investment.csv">
+        <entry key="/output/home_investment_low_interest_house_fully_rented/year/investment.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
             </Attribute>
           </value>
         </entry>
-        <entry key="/output/test_home_investment_low_interest_house_month_cf_neg.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="/output/test_home_investment_low_interest_house_month_cf_pos.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="/output/test_home_investment_low_interest_house_month_investment.csv">
+        <entry key="/output/home_investment_low_interest_house_fully_rented/year/operating_cost.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />

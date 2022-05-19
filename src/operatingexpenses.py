@@ -51,7 +51,7 @@ class OperatingExpenses(object):
         return Dollar(self._income.vacancy_rate * self._income.tenant_rent[month])
 
     def management_fee(self, month):
-        return Dollar(self._income.management_fee_rate * self._income.rent[month])
+        return Dollar(self._income.management_fee_rate * (self._income.tenant_rent[month] - self.vacancy(month)))
 
 
 OperatingExpensesFactoryType = Callable[[Purchase, Income, Taxes], OperatingExpenses]

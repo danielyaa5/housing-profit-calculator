@@ -17,7 +17,6 @@ class BreakdownForMonth(BreakdownFor):
 
     def generator(self) -> Generator[RowMonth, None, None]:
         mortgage = self._home_investment.mortgage
-        purchase = self._home_investment.purchase
         
         last = RowMonth(
             home_investment=self._home_investment,
@@ -26,11 +25,12 @@ class BreakdownForMonth(BreakdownFor):
             principle=Dollar(0),
             interest=Dollar(0),
             deductible_interest=Dollar(0),
-            net_expenses=Dollar(0),
-            net_cashflow_positive=Dollar(0),
+            net_operating_cost=Dollar(0),
+            net_income=Dollar(0),
             net_cashflow=-Dollar(0),
             principle_paid=Dollar(0),
-            appreciated_price=purchase.price,
+            interest_paid=Dollar(0),
+            appreciated_price=Dollar(0),
             index_fund_value=Dollar(0),
             cashflow_surplus_index_fund_value=Dollar(0)
         )
@@ -45,10 +45,11 @@ class BreakdownForMonth(BreakdownFor):
                 principle=principle,
                 interest=interest,
                 deductible_interest=deductible_interest,
-                net_expenses=last.net_expenses,
-                net_cashflow_positive=last.net_cashflow_positive,
+                net_operating_cost=last.net_operating_cost,
+                net_income=last.net_income,
                 net_cashflow=last.net_cashflow,
                 principle_paid=last.principle_paid,
+                interest_paid=last.interest_paid,
                 appreciated_price=last.appreciated_price,
                 index_fund_value=last.index_fund_value,
                 cashflow_surplus_index_fund_value=last.cashflow_surplus_index_fund_value

@@ -33,8 +33,8 @@ def compound_interest(principle, rate, years, number):
     return amount
 
 
-def compound_yearly(principle, rate, year):
-    return compound_interest(principle, rate, year, 1)
+def compound_yearly(principle, rate, years):
+    return compound_interest(principle, rate, years, 1)
 
 
 def sub(iterable):

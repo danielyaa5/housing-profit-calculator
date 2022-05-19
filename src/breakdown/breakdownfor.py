@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import functools
 import os
-import pathlib
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Generator, Literal
 
@@ -40,14 +39,22 @@ class BreakdownFor(ABC, object):
     def tabulate(self):
         return tabulate(self.df(), headers='keys', showindex=False)
 
+    def _csv(self, filename, columns=None):
+        output_path = rel('../../output', self._home_investment.scenario_name, self.time_length, filename)
+        os.makedirs(os.path.dirname(output_path), exist_ok=True)
+        print(f'Outputting {filename} to {output_path}\n')
+        self.df(columns).to_csv(output_path, index=False)
+        return output_path
+
     def csv(self):
-        filename = f'{self._home_investment.scenario_name}_{self.time_length}.csv'
+        filename = 'full.csv'
         output_path = self._csv(filename)
         return output_path
 
-    def csv_cashflow_negative(self):
+    def csv_operating_cost(self):
         columns = [
             'month',
+            'year',
             'principle',
             'interest',
             'mortgage',
@@ -57,52 +64,74 @@ class BreakdownFor(ABC, object):
             'vacancy',
             'maintenance',
             'management_fee',
-            'expenses',
-            'net_expenses',
-            'cashflow_negative',
+            'operating_cost',
+            'net_operating_cost',
         ]
 
-        filename = f'{self._home_investment.scenario_name}_{self.time_length}_cf_neg.csv'
+        filename = 'operating_cost.csv'
         output_path = self._csv(filename=filename, columns=columns)
         return output_path
 
-    def csv_cashflow_positive(self):
+    def csv_income(self):
         columns = [
             'month',
+            'year',
             'deductible_interest',
             'tax_savings',
             'rent',
             'tenant_rent',
-            'cashflow_positive',
-            'net_cashflow_positive',
+            'income',
+            'net_income',
         ]
 
-        filename = f'{self._home_investment.scenario_name}_{self.time_length}_cf_pos.csv'
+        filename = 'income.csv'
+        output_path = self._csv(filename=filename, columns=columns)
+        return output_path
+
+    def csv_cashflow(self):
+        columns = [
+            'month',
+            'year',
+            'income',
+            'adjusted_income',
+            'mortgage',
+            'operating_cost',
+            'expenses',
+            'cashflow',
+        ]
+
+        if self.time_length == 'year':
+            columns.append('cash_on_cash_return')
+
+        columns += [
+            'equity',
+            'cash_to_receive'
+        ]
+
+        filename = 'cashflow.csv'
         output_path = self._csv(filename=filename, columns=columns)
         return output_path
 
     def csv_investment(self):
         columns = [
-            'expenses',
-            'net_expenses',
-            'cashflow_positive',
-            'net_cashflow_positive',
+            'month',
+            'year',
             'cashflow',
             'net_cashflow',
-            'appreciation',
-            'appreciated_price',
-            'principle_paid',
-            'sale_closing_cost',
             'equity',
             'cashflow_surplus_index_fund_value',
+            'sale_closing_cost',
+            'cash_to_receive',
             'home_investment_value',
             'home_roi',
             'index_fund_value',
             'index_fund_roi',
-            'home_investment_vs_index_fund_roi'
+            'score'
         ]
+        if self.time_length == 'year':
+            columns.append('cash_on_cash_return')
 
-        filename = f'{self._home_investment.scenario_name}_{self.time_length}_investment.csv'
+        filename = 'investment.csv'
         output_path = self._csv(filename=filename, columns=columns)
         return output_path
 
@@ -116,15 +145,9 @@ class BreakdownFor(ABC, object):
             'home_roi',
             'index_fund_value',
             'index_fund_roi',
-            'home_investment_vs_index_fund_roi'
+            'score'
         ]
 
-        filename = f'{self._home_investment.scenario_name}_{self.time_length}_investment_short.csv'
+        filename = 'investment_short.csv'
         output_path = self._csv(filename=filename, columns=columns)
-        return output_path
-
-    def _csv(self, filename, columns=None):
-        output_path = rel('../../output', filename)
-        print(f'Outputting {filename} to {output_path}\n')
-        self.df(columns).to_csv(output_path, index=False)
         return output_path

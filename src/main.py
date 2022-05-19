@@ -1,12 +1,6 @@
 import argparse
 import os
-import pathlib
 import sys
-
-import yaml
-
-from helpers import folder_del_contents, rel
-from homeinvestment import HomeInvestment
 
 
 def _parse_args():
@@ -57,21 +51,7 @@ def _parse_args():
 
 
 def main(home_investment, delete_output):
-    # Delete everything in the output directory if the user requested it
-    if delete_output:
-        folder_del_contents(rel('../output'))
-
-    home_investment.describe()
-
-    home_investment.monthly().csv()
-    home_investment.monthly().csv_cashflow_negative()
-    home_investment.monthly().csv_cashflow_positive()
-    home_investment.monthly().csv_investment()
-    home_investment.monthly().csv_investment_short()
-
-    home_investment.yearly().csv()
-    home_investment.yearly().csv_investment()
-    home_investment.yearly().csv_investment_short()
+    pass
 
 
 if __name__ == '__main__':
